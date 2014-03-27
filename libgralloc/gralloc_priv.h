@@ -218,10 +218,7 @@ enum {
 /*****************************************************************************/
 
 #ifdef QCOM_BSP
-typedef struct {
-    int32_t paramType;
-    float   paramValue;
-} MetaData_t;
+#include <qdMetaData.h>
 #endif
 #ifdef __cplusplus
 struct private_handle_t : public native_handle {
