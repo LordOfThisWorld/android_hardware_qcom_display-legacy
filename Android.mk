@@ -5,8 +5,8 @@ ifeq ($(TARGET_QCOM_DISPLAY_VARIANT),legacy)
 
 display-hals := libgralloc libgenlock libcopybit
 display-hals += libhwcomposer liboverlay libqdutils
-display-hals += libtilerenderer
-display-hals += libmemtrack
+display-hals += libtilerenderer libqservice libexternal
+display-hals += libmemtrack libvirtual
 
 ifneq ($(TARGET_PROVIDES_LIBLIGHT),true)
 display-hals += liblight
