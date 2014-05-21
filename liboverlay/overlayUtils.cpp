@@ -28,6 +28,7 @@
 */
 
 #include <stdlib.h>
+#include <math.h>
 #include <utils/Log.h>
 #include <linux/msm_mdp.h>
 #include <cutils/properties.h>
@@ -245,6 +246,46 @@ int getMdpFormat(int format) {
     }
     // not reached
     return -1;
+}
+
+int getDownscaleFactor(const int& src_w, const int& src_h,
+        const int& dst_w, const int& dst_h) {
+    int dscale_factor = utils::ROT_DS_NONE;
+    // We need this check to engage the rotator whenever possible to assist MDP
+    // in performing video downscale.
+    // This saves bandwidth and avoids causing the driver to make too many panel
+    // -mode switches between BLT (writeback) and non-BLT (Direct) modes.
+    // Use-case: Video playback [with downscaling and rotation].
+    if (dst_w && dst_h)
+    {
+        float fDscale =  (float)(src_w * src_h) / (float)(dst_w * dst_h);
+
+        float tempfDscale = sqrtf(fDscale);
+        // On our MTP 1080p playback case downscale after sqrt is coming to 1.87
+        // we were rounding to 1. So entirely MDP has to do the downscaling.
+        // BW requirement and clock requirement is high across MDP4 targets.
+        // It is unable to downscale 1080p video to panel resolution on 8960.
+        // round(x) will round it to nearest integer and avoids above issue.
+        if(tempfDscale > 1.30 && tempfDscale < 1.50)
+            tempfDscale = 1.5;
+
+        uint32_t dscale = round(tempfDscale);
+
+        if(dscale < 2) {
+            // Down-scale to > 50% of orig.
+            dscale_factor = utils::ROT_DS_NONE;
+        } else if(dscale < 4) {
+            // Down-scale to between > 25% to <= 50% of orig.
+            dscale_factor = utils::ROT_DS_HALF;
+        } else if(dscale < 8) {
+            // Down-scale to between > 12.5% to <= 25% of orig.
+            dscale_factor = utils::ROT_DS_FOURTH;
+        } else {
+            // Down-scale to <= 12.5% of orig.
+            dscale_factor = utils::ROT_DS_EIGHTH;
+        }
+    }
+    return dscale_factor;
 }
 
 int getOverlayMagnificationLimit()

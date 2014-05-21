@@ -492,6 +492,8 @@ struct ScreenInfo {
 };
 
 int getMdpFormat(int format);
+int getDownscaleFactor(const int& src_w, const int& src_h,
+        const int& dst_w, const int& dst_h);
 int getRotOutFmt(uint32_t format);
 /* flip is upside down and such. V, H flip
  * rotation is 90, 180 etc

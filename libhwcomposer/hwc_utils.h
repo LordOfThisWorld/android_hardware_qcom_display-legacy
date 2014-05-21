@@ -25,6 +25,8 @@
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
+#define MAX_DISPLAY_DIM 2048
+
 //Fwrd decls
 struct hwc_context_t;
 struct framebuffer_device_t;
@@ -47,6 +49,30 @@ struct MDPInfo {
     int version;
     char panel;
     bool hasOverlay;
+};
+
+struct DisplayAttributes {
+    uint32_t vsync_period; //nanos
+    uint32_t xres;
+    uint32_t yres;
+    uint32_t stride;
+    float xdpi;
+    float ydpi;
+    int fd;
+    bool connected; //Applies only to pluggable disp.
+    //Connected does not mean it ready to use.
+    //It should be active also. (UNBLANKED)
+    bool isActive;
+    // In pause state, composition is bypassed
+    // used for WFD displays only
+    bool isPause;
+    // To trigger padding round to clean up mdp
+    // pipes
+    bool isConfiguring;
+    // External Display is in MDP Downscale mode indicator
+    bool mDownScaleMode;
+    // Ext dst Rect
+    hwc_rect_t mDstRect;
 };
 
 enum external_display_type {
@@ -169,6 +195,7 @@ struct hwc_context_t {
 
     // External display related information
     qhwc::ExternalDisplay *mExtDisplay;
+    qhwc::DisplayAttributes dpyAttr[HWC_NUM_DISPLAY_TYPES];
 
     qhwc::MDPInfo mMDP;
 

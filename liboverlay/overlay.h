@@ -38,6 +38,13 @@ namespace overlay {
 /**/
 class Overlay : utils::NoCopy {
 public:
+    //Abstract Display types. Each backed by a LayerMixer,
+    //represented by a fb node.
+    //High res panels can be backed by 2 layer mixers and a single fb node.
+    enum { DPY_PRIMARY, DPY_EXTERNAL, DPY_WRITEBACK, DPY_UNUSED };
+    enum { DPY_MAX = DPY_UNUSED };
+    enum { MAX_FB_DEVICES = DPY_MAX };
+
     /* dtor close */
     ~Overlay();
 
@@ -68,6 +75,8 @@ public:
 
     /* Returns the singleton instance of overlay */
     static Overlay* getInstance();
+    /* Returns the framebuffer node backing up the display */
+    static int getFbForDpy(const int& dpy);
 
 private:
     /* Ctor setup */
@@ -86,7 +95,13 @@ private:
 
     /* Singleton Instance*/
     static Overlay *sInstance;
+    static int sDpyFbMap[DPY_MAX];
 };
+
+inline int Overlay::getFbForDpy(const int& dpy) {
+    OVASSERT(dpy >= 0 && dpy < DPY_MAX, "Invalid dpy %d", dpy);
+    return sDpyFbMap[dpy];
+}
 
 } // overlay
 
