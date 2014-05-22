@@ -200,4 +200,6 @@ Overlay* Overlay::getInstance() {
     return sInstance;
 }
 
+int Overlay::sDpyFbMap[DPY_MAX] = {0, -1,-1};
+
 } // overlay
